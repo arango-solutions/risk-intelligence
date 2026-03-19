@@ -27,7 +27,7 @@ def _ensure_endpoint_has_port(url: str, default_port: int = 8529) -> str:
 ARANGO_ENDPOINT = _ensure_endpoint_has_port(os.getenv("ARANGO_ENDPOINT") or "")
 ARANGO_USERNAME = os.getenv("ARANGO_USERNAME", "root")
 ARANGO_PASSWORD = os.getenv("ARANGO_PASSWORD")
-ARANGO_DATABASE = os.getenv("ARANGO_DATABASE", "risk-management")
+ARANGO_DATABASE = os.getenv("ARANGO_DATABASE", "risk-intelligence")
 
 # File paths
 ONTOLOGY_PATH = "sentries_ontology.owl"

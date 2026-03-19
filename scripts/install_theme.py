@@ -12,7 +12,7 @@ load_dotenv()
 ARANGO_ENDPOINT = os.getenv("ARANGO_ENDPOINT")
 ARANGO_USERNAME = os.getenv("ARANGO_USERNAME", "root")
 ARANGO_PASSWORD = os.getenv("ARANGO_PASSWORD")
-ARANGO_DATABASE = os.getenv("ARANGO_DATABASE", "risk-management")
+ARANGO_DATABASE = os.getenv("ARANGO_DATABASE", "risk-intelligence")
 
 # File paths
 THEME_FILES = [
@@ -193,6 +193,75 @@ def prune_theme(base_theme_raw, vertex_colls, edge_colls):
                 
     return theme
 
+DEMO_SCENARIOS_QUERY = """\
+FOR doc IN UNION(
+  (FOR d IN Person       FILTER d.dataSource == "Synthetic" RETURN d),
+  (FOR d IN Organization FILTER d.dataSource == "Synthetic" RETURN d),
+  (FOR d IN Vessel       FILTER d.dataSource == "Synthetic" RETURN d),
+  (FOR d IN Aircraft     FILTER d.dataSource == "Synthetic" RETURN d)
+)
+RETURN doc"""
+
+# Data-bearing graphs only (OntologyGraph has no instance data)
+DEMO_ACTION_GRAPHS = {"DataGraph", "KnowledgeGraph"}
+
+
+def install_demo_saved_query(db) -> None:
+    """Upsert a saved AQL query so users can load synthetic nodes from the editor."""
+    if not db.has_collection("_editor_saved_queries"):
+        db.create_collection("_editor_saved_queries", system=True)
+
+    col = db.collection("_editor_saved_queries")
+    name = "Load Demo Scenarios"
+    existing = list(col.find({"name": name}))
+    doc = {
+        "name": name,
+        "value": DEMO_SCENARIOS_QUERY,
+        "parameter": "{}",
+    }
+    if existing:
+        doc["_key"] = existing[0]["_key"]
+        doc["_id"] = existing[0]["_id"]
+        col.replace(doc)
+        print(f"  [Updated saved query] {name}")
+    else:
+        col.insert(doc)
+        print(f"  [Installed saved query] {name}")
+
+
+def install_demo_canvas_action(db, graph_name: str, vp_id: str) -> None:
+    """Upsert a canvas-level action that loads all synthetic scenario nodes."""
+    canvas_col = db.collection("_canvasActions")
+    vp_act_col = db.collection("_viewpointActions")
+
+    action_name = "Load Demo Scenarios"
+    now = datetime.utcnow().isoformat() + "Z"
+    action_doc = {
+        "name": action_name,
+        "description": "Bring all synthetic demo-scenario nodes onto the canvas",
+        "queryText": DEMO_SCENARIOS_QUERY,
+        "graphId": graph_name,
+        "bindVariables": {},
+        "updatedAt": now,
+    }
+
+    existing = list(canvas_col.find({"name": action_name, "graphId": graph_name}))
+    if existing:
+        action_doc["_key"] = existing[0]["_key"]
+        action_doc["_id"] = existing[0]["_id"]
+        canvas_col.replace(action_doc)
+        action_id = existing[0]["_id"]
+    else:
+        action_doc["createdAt"] = now
+        res = canvas_col.insert(action_doc)
+        action_id = res["_id"]
+        print(f"    [Installed canvas action] {action_name} → {graph_name}")
+
+    # Link to viewpoint if not already linked
+    if not list(vp_act_col.find({"_from": vp_id, "_to": action_id})):
+        vp_act_col.insert({"_from": vp_id, "_to": action_id, "createdAt": now, "updatedAt": now})
+
+
 def install_themes():
     db = get_db()
     
@@ -298,8 +367,23 @@ def install_themes():
                 theme_col.insert(theme)
                 print(f"  [Installed Theme] Graph: {g_id}, Name: {theme['name']} (Tailored: {len(theme.get('nodeConfigMap',{}))} nodes, {len(theme.get('edgeConfigMap',{}))} edges)")
             
-            # 4. Install Tailored Canvas Actions
+            # 4. Install Tailored Canvas Actions (per-collection Expand actions)
             install_canvas_actions(db, g_id, vertex_colls, edge_colls)
+
+            # 5. Install "Load Demo Scenarios" canvas action for data-bearing graphs
+            if g_id in DEMO_ACTION_GRAPHS:
+                # Resolve the viewpoint id (same logic as install_canvas_actions)
+                vp_col = db.collection("_viewpoints")
+                vp_docs = (
+                    list(vp_col.find({"graphId": g_id, "name": "Default"}))
+                    or list(vp_col.find({"graphId": g_id}))
+                )
+                if vp_docs:
+                    install_demo_canvas_action(db, g_id, vp_docs[0]["_id"])
+
+    # Install the AQL editor saved query once (not per-graph)
+    print("\nInstalling demo saved query...")
+    install_demo_saved_query(db)
 
     print("\n" + "="*80)
     print("Tailored Theme & Canvas Action Installation Complete")
