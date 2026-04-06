@@ -9,34 +9,27 @@
                 "iconName": "fa6-solid:user"
             },
             "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
                     "condition": "inferredRisk >= 0.8",
-                    "background": {
-                        "color": "#e53e3e"
-                    }
+                    "background": { "color": "#e53e3e" }
                 },
                 {
                     "name": "Low Risk",
                     "condition": "inferredRisk < 0.3",
-                    "background": {
-                        "color": "#38a169"
-                    }
+                    "background": { "color": "#38a169" }
                 },
                 {
                     "name": "Medium Risk",
                     "condition": "inferredRisk < 0.8",
-                    "background": {
-                        "color": "#ecc94b"
-                    }
+                    "background": { "color": "#ecc94b" }
                 },
                 {
                     "name": "Synthetic Entity",
                     "condition": "dataSource == 'Synthetic'",
-                    "background": {
-                        "iconName": "fa6-solid:vial"
-                    }
+                    "background": { "iconName": "fa6-solid:vial" }
                 }
             ]
         },
@@ -46,34 +39,27 @@
                 "iconName": "fa6-solid:building"
             },
             "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
                     "condition": "inferredRisk >= 0.8",
-                    "background": {
-                        "color": "#e53e3e"
-                    }
+                    "background": { "color": "#e53e3e" }
                 },
                 {
                     "name": "Low Risk",
                     "condition": "inferredRisk < 0.3",
-                    "background": {
-                        "color": "#38a169"
-                    }
+                    "background": { "color": "#38a169" }
                 },
                 {
                     "name": "Medium Risk",
                     "condition": "inferredRisk < 0.8",
-                    "background": {
-                        "color": "#ecc94b"
-                    }
+                    "background": { "color": "#ecc94b" }
                 },
                 {
                     "name": "Synthetic Entity",
                     "condition": "dataSource == 'Synthetic'",
-                    "background": {
-                        "iconName": "fa6-solid:vial"
-                    }
+                    "background": { "iconName": "fa6-solid:vial" }
                 }
             ]
         },
@@ -82,120 +68,137 @@
                 "color": "#e2e8f0",
                 "iconName": "fa6-solid:ship"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
+            "rules": [
+                {
+                    "name": "High Risk",
+                    "condition": "inferredRisk >= 0.8",
+                    "background": { "color": "#e53e3e" }
+                },
+                {
+                    "name": "Low Risk",
+                    "condition": "inferredRisk < 0.3",
+                    "background": { "color": "#38a169" }
+                },
+                {
+                    "name": "Medium Risk",
+                    "condition": "inferredRisk < 0.8",
+                    "background": { "color": "#ecc94b" }
+                },
+                {
+                    "name": "Synthetic Entity",
+                    "condition": "dataSource == 'Synthetic'",
+                    "background": { "iconName": "fa6-solid:vial" }
+                }
+            ]
         },
         "Aircraft": {
             "background": {
                 "color": "#e2e8f0",
                 "iconName": "fa6-solid:plane"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk"],
+            "rules": [
+                {
+                    "name": "High Risk",
+                    "condition": "inferredRisk >= 0.8",
+                    "background": { "color": "#e53e3e" }
+                },
+                {
+                    "name": "Low Risk",
+                    "condition": "inferredRisk < 0.3",
+                    "background": { "color": "#38a169" }
+                },
+                {
+                    "name": "Medium Risk",
+                    "condition": "inferredRisk < 0.8",
+                    "background": { "color": "#ecc94b" }
+                }
+            ]
         },
         "Class": {
             "background": {
                 "color": "#9f7aea",
                 "iconName": "fa6-solid:shapes"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "_id"]
         },
         "Property": {
             "background": {
                 "color": "#48bb78",
                 "iconName": "fa6-solid:link"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "_id"]
         },
         "ObjectProperty": {
             "background": {
                 "color": "#48bb78",
                 "iconName": "fa6-solid:link"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "_id"]
         },
         "Ontology": {
             "background": {
                 "color": "#4a5568",
                 "iconName": "fa6-solid:database"
             },
-            "labelAttribute": "label"
+            "labelAttribute": "label",
+            "hoverInfoAttributes": ["label", "_id"]
         }
     },
     "edgeConfigMap": {
         "owned_by": {
-            "lineStyle": {
-                "color": "#d69e2e",
-                "thickness": 1.2
-            },
+            "lineStyle": { "color": "#d69e2e", "thickness": 1.2 },
             "labelAttribute": "label",
             "rules": [
                 {
                     "name": "Synthetic Relationship",
                     "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": {
-                        "lineType": "dashed"
-                    }
+                    "lineStyle": { "lineType": "dashed" }
                 }
             ]
         },
         "leader_of": {
-            "lineStyle": {
-                "color": "#4299e1",
-                "thickness": 1.0
-            },
+            "lineStyle": { "color": "#4299e1", "thickness": 1.0 },
             "labelAttribute": "label",
             "rules": [
                 {
                     "name": "Synthetic Relationship",
                     "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": {
-                        "lineType": "dashed"
-                    }
+                    "lineStyle": { "lineType": "dashed" }
                 }
             ]
         },
         "operates": {
-            "lineStyle": {
-                "color": "#4a5568",
-                "thickness": 0.8
-            },
+            "lineStyle": { "color": "#4a5568", "thickness": 0.8 },
             "labelAttribute": "label",
             "rules": [
                 {
                     "name": "Synthetic Relationship",
                     "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": {
-                        "lineType": "dashed"
-                    }
+                    "lineStyle": { "lineType": "dashed" }
                 }
             ]
         },
         "family_member_of": {
-            "lineStyle": {
-                "color": "#805ad5",
-                "thickness": 1.0
-            },
+            "lineStyle": { "color": "#805ad5", "thickness": 1.0 },
             "labelAttribute": "label",
             "rules": [
                 {
                     "name": "Synthetic Relationship",
                     "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": {
-                        "lineType": "dashed"
-                    }
+                    "lineStyle": { "lineType": "dashed" }
                 }
             ]
         },
-        "subClassOf": {
-            "labelAttribute": "label"
-        },
-        "domain": {
-            "labelAttribute": "label"
-        },
-        "range": {
-            "labelAttribute": "label"
-        },
-        "type": {
-            "labelAttribute": "label"
-        }
+        "subClassOf": { "labelAttribute": "label" },
+        "domain":     { "labelAttribute": "label" },
+        "range":      { "labelAttribute": "label" },
+        "type":       { "labelAttribute": "label" }
     }
 }
