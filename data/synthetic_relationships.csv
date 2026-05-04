@@ -7,3 +7,8 @@ SYN-B01,SYN-A01,15004,family_member_of: Hassan is associate of Carlos Medina Rui
 SYN-B01,SYN-B02,91725,leader_of: Hassan leads Al-Qasim Trading → org gets 0.5x0.8=0.4
 SYN-B03,SYN-B02,15003,owned_by: Levant Commerce owned by Al-Qasim Trading → gets 0.4
 SYN-B04,SYN-B01,15004,family_member_of: Fatima is family of Hassan → gets 0.5x0.5=0.25
+SYN-D02,SYN-D01,15003,owned_by: Holding Layer 1 owned by Sanctioned Org → inferredRisk 1.0
+SYN-D03,SYN-D02,15003,owned_by: Holding Layer 2 owned by Holding Layer 1 → inferredRisk 1.0
+SYN-D04,SYN-D03,15003,owned_by: Vetting Target owned by Holding Layer 2 → inferredRisk 1.0 (3-hop)
+SYN-E02,SYN-E01,15004,family_member_of: Relative is family of Sanctioned Individual → inferredRisk 0.5
+SYN-E03,SYN-E02,15003,owned_by: Vetting Target owned by Relative → inferredRisk 0.5

@@ -1,7 +1,7 @@
 {
     "graphId": "KnowledgeGraph",
     "name": "sentries_risk_heatmap",
-    "description": "Risk heatmap theme with label-based naming and dynamic threat coloring",
+    "description": "Risk heatmap theme: colors nodes by pre-computed riskLevel (high/medium/low) for broad Visualizer compatibility",
     "nodeConfigMap": {
         "Person": {
             "background": {
@@ -9,22 +9,22 @@
                 "iconName": "fa6-solid:user"
             },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
-                    "condition": "inferredRisk >= 0.8",
+                    "condition": "riskLevel == 'high'",
                     "background": { "color": "#e53e3e" }
                 },
                 {
-                    "name": "Low Risk",
-                    "condition": "inferredRisk < 0.3",
-                    "background": { "color": "#38a169" }
+                    "name": "Medium Risk",
+                    "condition": "riskLevel == 'medium'",
+                    "background": { "color": "#ecc94b" }
                 },
                 {
-                    "name": "Medium Risk",
-                    "condition": "inferredRisk < 0.8",
-                    "background": { "color": "#ecc94b" }
+                    "name": "Low Risk",
+                    "condition": "riskLevel == 'low'",
+                    "background": { "color": "#38a169" }
                 },
                 {
                     "name": "Synthetic Entity",
@@ -39,22 +39,22 @@
                 "iconName": "fa6-solid:building"
             },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
-                    "condition": "inferredRisk >= 0.8",
+                    "condition": "riskLevel == 'high'",
                     "background": { "color": "#e53e3e" }
                 },
                 {
-                    "name": "Low Risk",
-                    "condition": "inferredRisk < 0.3",
-                    "background": { "color": "#38a169" }
+                    "name": "Medium Risk",
+                    "condition": "riskLevel == 'medium'",
+                    "background": { "color": "#ecc94b" }
                 },
                 {
-                    "name": "Medium Risk",
-                    "condition": "inferredRisk < 0.8",
-                    "background": { "color": "#ecc94b" }
+                    "name": "Low Risk",
+                    "condition": "riskLevel == 'low'",
+                    "background": { "color": "#38a169" }
                 },
                 {
                     "name": "Synthetic Entity",
@@ -69,22 +69,22 @@
                 "iconName": "fa6-solid:ship"
             },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "dataSource"],
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
-                    "condition": "inferredRisk >= 0.8",
+                    "condition": "riskLevel == 'high'",
                     "background": { "color": "#e53e3e" }
                 },
                 {
-                    "name": "Low Risk",
-                    "condition": "inferredRisk < 0.3",
-                    "background": { "color": "#38a169" }
+                    "name": "Medium Risk",
+                    "condition": "riskLevel == 'medium'",
+                    "background": { "color": "#ecc94b" }
                 },
                 {
-                    "name": "Medium Risk",
-                    "condition": "inferredRisk < 0.8",
-                    "background": { "color": "#ecc94b" }
+                    "name": "Low Risk",
+                    "condition": "riskLevel == 'low'",
+                    "background": { "color": "#38a169" }
                 },
                 {
                     "name": "Synthetic Entity",
@@ -99,22 +99,22 @@
                 "iconName": "fa6-solid:plane"
             },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk"],
+            "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
                 {
                     "name": "High Risk",
-                    "condition": "inferredRisk >= 0.8",
+                    "condition": "riskLevel == 'high'",
                     "background": { "color": "#e53e3e" }
                 },
                 {
-                    "name": "Low Risk",
-                    "condition": "inferredRisk < 0.3",
-                    "background": { "color": "#38a169" }
+                    "name": "Medium Risk",
+                    "condition": "riskLevel == 'medium'",
+                    "background": { "color": "#ecc94b" }
                 },
                 {
-                    "name": "Medium Risk",
-                    "condition": "inferredRisk < 0.8",
-                    "background": { "color": "#ecc94b" }
+                    "name": "Low Risk",
+                    "condition": "riskLevel == 'low'",
+                    "background": { "color": "#38a169" }
                 }
             ]
         },

@@ -114,7 +114,20 @@ if __name__ == "__main__":
     
     iterations = 3
     for i in range(1, iterations + 1):
-       print(f"Propagating iteration {i}/{iterations}...")
-       run_propagation_iteration(db, colls)
-    
+        print(f"Propagating iteration {i}/{iterations}...")
+        run_propagation_iteration(db, colls)
+
+    # Write a discrete riskLevel string so the Visualizer can use simple
+    # equality conditions (universally supported across all Visualizer versions)
+    # rather than numeric comparisons which require a newer Visualizer build.
+    print("Writing riskLevel attribute...")
+    for c in colls:
+        if db.has_collection(c):
+            db.aql.execute(f"""
+                FOR d IN {c}
+                    LET ir = d.inferredRisk || 0
+                    LET lvl = ir >= 0.8 ? 'high' : (ir >= 0.3 ? 'medium' : 'low')
+                    UPDATE d WITH {{ riskLevel: lvl }} IN {c}
+            """)
+
     print("Inferred risk propagation complete.")
