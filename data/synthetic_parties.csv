@@ -12,8 +12,7 @@ SYN-B04,Fatima Al-Qasim,4,0.0,B,Second-degree family contact
 SYN-C01,Meridian Global Logistics GmbH,3,0.0,C,Clean counterparty - no risk connections
 SYN-C02,James R. Hartwell,4,0.0,C,Clean executive - no risk connections
 SYN-C03,MV Pacific Star,1,0.0,C,Clean vessel - no risk connections
-SYN-D01,Sanctioned Org,3,1.0,D,Shell Game anchor - SDN-listed organisation
-SYN-D02,Holding Layer 1,3,0.0,D,Shell Game - first ownership layer (inferredRisk → 1.0)
+SYN-D02,Holding Layer 1,3,0.0,D,Shell Game - first ownership layer; owned by real OFAC entity GOMEZ MARIN LTDA (10003)
 SYN-D03,Holding Layer 2,3,0.0,D,Shell Game - second ownership layer (inferredRisk → 1.0)
 SYN-D04,Vetting Target - Shell Game,3,0.0,D,Shell Game - clean-looking org buried 3 hops from SDN (inferredRisk → 1.0)
 SYN-E01,Sanctioned Individual,4,1.0,E,Proxy Link anchor - SDN-listed person
