@@ -42,7 +42,24 @@ EXCLUDED_VERTEX_COLLECTIONS_BY_GRAPH: Dict[str, Set[str]] = {
 
 TARGET_GRAPHS = ["OntologyGraph", "DataGraph", "KnowledgeGraph"]
 
-# AQL text for the "Load Demo Scenarios" feature
+# ---------------------------------------------------------------------------
+# Demo query definitions
+# Each entry: (key_suffix, display_name, aql)
+# key_suffix is slugified and prefixed with "risk_" to form the _key in _queries.
+# ---------------------------------------------------------------------------
+
+def _scenario_union(scenario: str) -> str:
+    """AQL UNION across all entity collections filtered by scenario label."""
+    return (
+        f'FOR doc IN UNION(\n'
+        f'  (FOR d IN Person       FILTER d.dataSource == "Synthetic" AND d.scenario == "{scenario}" RETURN d),\n'
+        f'  (FOR d IN Organization FILTER d.dataSource == "Synthetic" AND d.scenario == "{scenario}" RETURN d),\n'
+        f'  (FOR d IN Vessel       FILTER d.dataSource == "Synthetic" AND d.scenario == "{scenario}" RETURN d),\n'
+        f'  (FOR d IN Aircraft     FILTER d.dataSource == "Synthetic" AND d.scenario == "{scenario}" RETURN d)\n'
+        f')\nRETURN doc'
+    )
+
+
 DEMO_SCENARIOS_QUERY = """\
 FOR doc IN UNION(
   (FOR d IN Person       FILTER d.dataSource == "Synthetic" RETURN d),
@@ -51,6 +68,47 @@ FOR doc IN UNION(
   (FOR d IN Aircraft     FILTER d.dataSource == "Synthetic" RETURN d)
 )
 RETURN doc"""
+
+# Ordered list of (key_suffix, display_name, aql) for the Visualizer Queries panel.
+# The first entry is the "all scenarios" bulk loader; the rest are per-scenario.
+VISUALIZER_QUERIES = [
+    (
+        "all_scenarios",
+        "All Demo Scenarios",
+        DEMO_SCENARIOS_QUERY,
+        "Load all synthetic demo entities onto the canvas",
+    ),
+    (
+        "scenario_d_shell_game",
+        "Demo D: Shell Game (3-hop)",
+        _scenario_union("D"),
+        "Shell Game: clean org buried 3 ownership hops from SDN (inferredRisk → 1.0)",
+    ),
+    (
+        "scenario_e_proxy_link",
+        "Demo E: Proxy Link (family)",
+        _scenario_union("E"),
+        "Proxy Link: org owned by a relative of an SDN individual (inferredRisk → 0.5)",
+    ),
+    (
+        "scenario_a_medina_network",
+        "Demo A: Medina Network",
+        _scenario_union("A"),
+        "Medina Network: SDN individual, corporate shell, and family connections",
+    ),
+    (
+        "scenario_b_al_qasim",
+        "Demo B: Al-Qasim Network",
+        _scenario_union("B"),
+        "Al-Qasim Network: second-degree associate chain",
+    ),
+    (
+        "scenario_c_clean",
+        "Demo C: Clean Counterparties",
+        _scenario_union("C"),
+        "Clean entities — no risk connections, expected riskLevel: low",
+    ),
+]
 
 
 # ---------------------------------------------------------------------------
@@ -319,7 +377,10 @@ def _upsert_editor_saved_query(db, key: str, name: str, aql: str) -> None:
         print(f"  [Installed editor query]  {name}")
 
 
-def _upsert_visualizer_query(db, graph_name: str, vp_id: str, key: str, name: str, aql: str) -> None:
+def _upsert_visualizer_query(
+    db, graph_name: str, vp_id: str, key: str, name: str, aql: str,
+    description: str = "",
+) -> None:
     """Upsert into _queries and link via _viewpointQueries for the Visualizer Queries panel.
 
     'queryText' is used here (distinct from _editor_saved_queries which uses content/value).
@@ -335,7 +396,7 @@ def _upsert_visualizer_query(db, graph_name: str, vp_id: str, key: str, name: st
         "_key": key,
         "name": name,
         "title": name,
-        "description": "Load synthetic demo-scenario nodes onto the canvas",
+        "description": description or name,
         "graphId": graph_name,
         "queryText": aql,
         "bindVariables": {},
@@ -348,7 +409,7 @@ def _upsert_visualizer_query(db, graph_name: str, vp_id: str, key: str, name: st
         doc["createdAt"] = existing[0].get("createdAt", now)
         col.replace(doc, check_rev=False)
         query_id = existing[0]["_id"]
-        print(f"  [Updated visualizer query] {name} ({graph_name})")
+        print(f"  [Updated visualizer query]   {name} ({graph_name})")
     else:
         doc["createdAt"] = now
         res = col.insert(doc)
@@ -435,26 +496,28 @@ def install_themes() -> None:
                 vp_id = ensure_default_viewpoint(db, graph_name)
                 install_demo_canvas_action(db, graph_name, vp_id)
 
-    # AQL editor saved query (appears in the global editor sidebar)
+    # AQL editor saved query (global Query Editor sidebar — bulk loader only)
     print("\nInstalling demo saved queries...")
     _upsert_editor_saved_query(
         db,
         key="risk_load_demo_scenarios",
-        name="Load Demo Scenarios",
+        name="All Demo Scenarios",
         aql=DEMO_SCENARIOS_QUERY,
     )
 
-    # Graph Visualizer Queries panel (appears when browsing DataGraph / KnowledgeGraph)
+    # Graph Visualizer Queries panel — one entry per scenario for both data graphs
     for graph_name in sorted(DATA_GRAPHS):
         if not db.has_graph(graph_name):
             continue
         vp_id = ensure_default_viewpoint(db, graph_name)
-        _upsert_visualizer_query(
-            db, graph_name, vp_id,
-            key=f"risk_demo_scenarios_{_slugify(graph_name)}",
-            name="Load Demo Scenarios",
-            aql=DEMO_SCENARIOS_QUERY,
-        )
+        for suffix, display_name, aql, desc in VISUALIZER_QUERIES:
+            _upsert_visualizer_query(
+                db, graph_name, vp_id,
+                key=f"risk_{suffix}_{_slugify(graph_name)}",
+                name=display_name,
+                aql=aql,
+                description=desc,
+            )
 
     print("\n" + "=" * 80)
     print("Theme & Visualizer installation complete.")
