@@ -71,6 +71,44 @@ RETURN doc"""
 
 # Ordered list of (key_suffix, display_name, aql) for the Visualizer Queries panel.
 # The first entry is the "all scenarios" bulk loader; the rest are per-scenario.
+
+# Scenario D: synthetic chain + NATIONAL IRANIAN TANKER COMPANY + 5 of its real subsidiaries
+_SCENARIO_D_QUERY = """\
+FOR doc IN UNION(
+  (FOR d IN Organization FILTER d.dataSource == "Synthetic" AND d.scenario == "D" RETURN d),
+  (FOR d IN Vessel       FILTER d.dataSource == "Synthetic" AND d.scenario == "D" RETURN d),
+  (LET anchor = DOCUMENT("Organization/15117") RETURN anchor),
+  (FOR e IN owned_by FILTER e._to == "Organization/15117"
+   SORT RAND() LIMIT 5
+   LET d = DOCUMENT(e._from) FILTER d != null RETURN d)
+)
+FILTER doc != null
+RETURN doc"""
+
+# Scenario A: synthetic network + FARC (the real SDN org Carlos leads)
+_SCENARIO_A_QUERY = """\
+FOR doc IN UNION(
+  (FOR d IN Person       FILTER d.dataSource == "Synthetic" AND d.scenario == "A" RETURN d),
+  (FOR d IN Organization FILTER d.dataSource == "Synthetic" AND d.scenario == "A" RETURN d),
+  (FOR d IN Vessel       FILTER d.dataSource == "Synthetic" AND d.scenario == "A" RETURN d),
+  (LET farc = DOCUMENT("Organization/33983") RETURN farc)
+)
+FILTER doc != null
+RETURN doc"""
+
+# Scenario E: synthetic chain + Sberbank + 5 of its real subsidiaries
+_SCENARIO_E_QUERY = """\
+FOR doc IN UNION(
+  (FOR d IN Person       FILTER d.dataSource == "Synthetic" AND d.scenario == "E" RETURN d),
+  (FOR d IN Organization FILTER d.dataSource == "Synthetic" AND d.scenario == "E" RETURN d),
+  (LET sberbank = DOCUMENT("Organization/17018") RETURN sberbank),
+  (FOR e IN owned_by FILTER e._to == "Organization/17018"
+   SORT RAND() LIMIT 5
+   LET d = DOCUMENT(e._from) FILTER d != null RETURN d)
+)
+FILTER doc != null
+RETURN doc"""
+
 VISUALIZER_QUERIES = [
     (
         "all_scenarios",
@@ -81,26 +119,26 @@ VISUALIZER_QUERIES = [
     (
         "scenario_d_shell_game",
         "Demo D: Shell Game (3-hop)",
-        _scenario_union("D"),
-        "Shell Game: clean org buried 3 ownership hops from SDN (inferredRisk → 1.0)",
+        _SCENARIO_D_QUERY,
+        "Shell Game: Vetting Target → 3-hop chain → NATIONAL IRANIAN TANKER COMPANY (126 real subsidiaries)",
     ),
     (
         "scenario_e_proxy_link",
         "Demo E: Proxy Link (family)",
-        _scenario_union("E"),
-        "Proxy Link: org owned by a relative of an SDN individual (inferredRisk → 0.5)",
+        _SCENARIO_E_QUERY,
+        "Proxy Link: Vetting Target owned by Relative of Sberbank executive (41 real subsidiaries)",
     ),
     (
         "scenario_a_medina_network",
         "Demo A: Medina Network",
-        _scenario_union("A"),
-        "Medina Network: SDN individual, corporate shell, and family connections",
+        _SCENARIO_A_QUERY,
+        "Medina Network: Carlos Medina Ruiz leads FARC + corporate shells + family web",
     ),
     (
         "scenario_b_al_qasim",
         "Demo B: Al-Qasim Network",
         _scenario_union("B"),
-        "Al-Qasim Network: second-degree associate chain",
+        "Al-Qasim Network: second-degree associate chain from Scenario A",
     ),
     (
         "scenario_c_clean",

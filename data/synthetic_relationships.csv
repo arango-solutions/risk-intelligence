@@ -1,5 +1,7 @@
 from_party,to_party,rel_type,notes
 SYN-A01,SYN-A02,91725,leader_of: Carlos leads Ruiz International → org gets 1.0x0.8=0.8
+SYN-A01,33983,91725,leader_of: Carlos also leads FARC (real OFAC SDN org) → grounds him in real OFAC graph
+SYN-A02,SYN-A06,92019,operates: Ruiz International operates MV Sierra Madre → vessel inherits risk 0.8x0.9
 SYN-A03,SYN-A02,15003,owned_by: Medellin Trade owned by Ruiz International → gets 0.8
 SYN-A04,SYN-A01,15004,family_member_of: Sofia is spouse of Carlos → gets 1.0x0.5=0.5
 SYN-A05,SYN-A04,15004,family_member_of: Diego is child of Sofia → gets 0.5x0.5=0.25
@@ -7,8 +9,12 @@ SYN-B01,SYN-A01,15004,family_member_of: Hassan is associate of Carlos Medina Rui
 SYN-B01,SYN-B02,91725,leader_of: Hassan leads Al-Qasim Trading → org gets 0.5x0.8=0.4
 SYN-B03,SYN-B02,15003,owned_by: Levant Commerce owned by Al-Qasim Trading → gets 0.4
 SYN-B04,SYN-B01,15004,family_member_of: Fatima is family of Hassan → gets 0.5x0.5=0.25
-SYN-D02,10003,15003,owned_by: Holding Layer 1 owned by GOMEZ MARIN LTDA (real OFAC SDN entity) → inferredRisk 1.0
+SYN-D02,15117,15003,owned_by: Holding Layer 1 owned by NATIONAL IRANIAN TANKER COMPANY (real OFAC; 126 subsidiaries)
 SYN-D03,SYN-D02,15003,owned_by: Holding Layer 2 owned by Holding Layer 1 → inferredRisk 1.0
 SYN-D04,SYN-D03,15003,owned_by: Vetting Target owned by Holding Layer 2 → inferredRisk 1.0 (3-hop)
+SYN-D05,SYN-D04,15003,owned_by: Caspian Maritime Holdings owned by Vetting Target → also contaminated
+SYN-D04,SYN-D06,92019,operates: Vetting Target operates MV North Star → vessel contaminated
+SYN-E01,17018,91725,leader_of: Sanctioned Individual leads Sberbank (real OFAC SDN org; 41 subsidiaries)
 SYN-E02,SYN-E01,15004,family_member_of: Relative is family of Sanctioned Individual → inferredRisk 0.5
 SYN-E03,SYN-E02,15003,owned_by: Vetting Target owned by Relative → inferredRisk 0.5
+SYN-E04,SYN-E03,15003,owned_by: Eastern Capital owned by Vetting Target → also contaminated

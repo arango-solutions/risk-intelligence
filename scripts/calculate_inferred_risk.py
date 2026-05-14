@@ -69,30 +69,38 @@ def run_propagation_iteration(db, colls):
 
     # Pass 4: Operates (bidirectional, weight 0.9)
     # Risk flows both ways: a high-risk operator taints the vessel/asset and vice-versa.
+    # We iterate over all (from_coll, to_coll) pairs to handle cross-collection edges
+    # (e.g. Organization operates Vessel).
     if db.has_collection('operates'):
-        for c in colls:
-            if db.has_collection(c):
-                # operator → operated entity
+        for from_c in colls:
+            if not db.has_collection(from_c):
+                continue
+            for to_c in colls:
+                if not db.has_collection(to_c):
+                    continue
+                # operator (from_c) → operated entity (to_c)
                 db.aql.execute(f"""
                     FOR e IN operates
-                    FILTER IS_SAME_COLLECTION('{c}', e._from)
+                    FILTER IS_SAME_COLLECTION('{from_c}', e._from)
+                    FILTER IS_SAME_COLLECTION('{to_c}', e._to)
                     LET op = DOCUMENT(e._from)
                     FILTER op != null AND (op.inferredRisk || 0) > 0
                     LET nr = op.inferredRisk * 0.9
                     LET ent = DOCUMENT(e._to)
                     FILTER ent != null AND nr > (ent.inferredRisk || 0)
-                    UPDATE ent WITH {{ inferredRisk: nr }} IN {c}
+                    UPDATE ent WITH {{ inferredRisk: nr }} IN {to_c}
                 """)
-                # operated entity → operator
+                # operated entity (to_c) → operator (from_c)
                 db.aql.execute(f"""
                     FOR e IN operates
-                    FILTER IS_SAME_COLLECTION('{c}', e._to)
+                    FILTER IS_SAME_COLLECTION('{from_c}', e._from)
+                    FILTER IS_SAME_COLLECTION('{to_c}', e._to)
                     LET ent = DOCUMENT(e._to)
                     FILTER ent != null AND (ent.inferredRisk || 0) > 0
                     LET nr = ent.inferredRisk * 0.9
                     LET op = DOCUMENT(e._from)
                     FILTER op != null AND nr > (op.inferredRisk || 0)
-                    UPDATE op WITH {{ inferredRisk: nr }} IN {c}
+                    UPDATE op WITH {{ inferredRisk: nr }} IN {from_c}
                 """)
 
 if __name__ == "__main__":
@@ -112,7 +120,7 @@ if __name__ == "__main__":
         if db.has_collection(c):
             db.aql.execute(f"FOR d IN {c} UPDATE d WITH {{ inferredRisk: d.riskScore || 0 }} IN {c}")
     
-    iterations = 3
+    iterations = 5
     for i in range(1, iterations + 1):
         print(f"Propagating iteration {i}/{iterations}...")
         run_propagation_iteration(db, colls)

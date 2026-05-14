@@ -1,10 +1,10 @@
 party_id,primary_name,party_type,risk_score,scenario,notes
-SYN-A01,Carlos Medina Ruiz,4,1.0,A,Synthetic SDN-listed individual - anchor of Scenario A
+SYN-A01,Carlos Medina Ruiz,4,1.0,A,Synthetic SDN-listed individual - anchor of Scenario A; also leads real OFAC entity FARC (33983)
 SYN-A02,Ruiz International Holdings S.A.,3,0.0,A,Org controlled by SYN-A01 via leader_of
 SYN-A03,Medellin Trade and Commerce LLC,3,0.0,A,Subsidiary owned by SYN-A02
 SYN-A04,Sofia Medina Torres,4,0.0,A,Spouse of SYN-A01
 SYN-A05,Diego Medina Torres,4,0.0,A,Child of SYN-A04
-SYN-A06,MV Sierra Madre,1,0.0,A,Vessel - isolated clean asset
+SYN-A06,MV Sierra Madre,1,0.0,A,Vessel operated by SYN-A02 (Ruiz International)
 SYN-B01,Hassan Al-Qasim,4,0.0,B,Associate - family connection to Carlos Medina Ruiz (SYN-A01)
 SYN-B02,Al-Qasim Trading Group,3,0.0,B,Org controlled by SYN-B01 via leader_of
 SYN-B03,Levant Commerce Solutions Ltd,3,0.0,B,Subsidiary owned by SYN-B02
@@ -12,9 +12,12 @@ SYN-B04,Fatima Al-Qasim,4,0.0,B,Second-degree family contact
 SYN-C01,Meridian Global Logistics GmbH,3,0.0,C,Clean counterparty - no risk connections
 SYN-C02,James R. Hartwell,4,0.0,C,Clean executive - no risk connections
 SYN-C03,MV Pacific Star,1,0.0,C,Clean vessel - no risk connections
-SYN-D02,Holding Layer 1,3,0.0,D,Shell Game - first ownership layer; owned by real OFAC entity GOMEZ MARIN LTDA (10003)
+SYN-D02,Holding Layer 1,3,0.0,D,Shell Game - first ownership layer; owned by NATIONAL IRANIAN TANKER COMPANY (15117; 126 real subsidiaries)
 SYN-D03,Holding Layer 2,3,0.0,D,Shell Game - second ownership layer (inferredRisk → 1.0)
-SYN-D04,Vetting Target - Shell Game,3,0.0,D,Shell Game - clean-looking org buried 3 hops from SDN (inferredRisk → 1.0)
-SYN-E01,Sanctioned Individual,4,1.0,E,Proxy Link anchor - SDN-listed person
+SYN-D04,Vetting Target - Shell Game,3,0.0,D,Shell Game - clean-looking org buried 3 hops from NITC (inferredRisk → 1.0)
+SYN-D05,Caspian Maritime Holdings LLC,3,0.0,D,Legitimate-looking subsidiary of Vetting Target (also contaminated via ownership)
+SYN-D06,MV North Star,1,0.0,D,Vessel operated by Vetting Target - Shell Game
+SYN-E01,Sanctioned Individual,4,1.0,E,Proxy Link anchor - SDN-listed; also leads real OFAC entity Sberbank (17018)
 SYN-E02,Relative,4,0.0,E,Proxy Link - family member of Sanctioned Individual (inferredRisk → 0.5)
 SYN-E03,Vetting Target - Family Link,3,0.0,E,Proxy Link - org owned by Relative (inferredRisk → 0.5)
+SYN-E04,Eastern Capital Management Ltd,3,0.0,E,Subsidiary of Vetting Target - Family Link (also contaminated via ownership)
