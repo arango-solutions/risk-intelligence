@@ -20,7 +20,11 @@ def load_env():
 
 def run_propagation_iteration(db, colls):
     # Unified propagation query for efficiency
-    # Pass 1: Ownership
+    # Pass 1: Ownership.
+    # Risk decays 0.85 per ownership hop so exposure forms a distance-based
+    # gradient (direct subsidiary of a sanctioned parent is high; a clean
+    # entity several hops removed grades down to medium/low) rather than every
+    # entity in an ownership chain saturating at the parent's full score.
     for c in colls:
         if db.has_collection(c):
             db.aql.execute(f"""
@@ -28,7 +32,7 @@ def run_propagation_iteration(db, colls):
                 FILTER IS_SAME_COLLECTION('{c}', e._from) 
                 LET o = DOCUMENT(e._to) 
                 FILTER o != null AND (o.inferredRisk || 0) > 0 
-                LET nr = o.inferredRisk * 1.0 
+                LET nr = o.inferredRisk * 0.85 
                 LET target = DOCUMENT(e._from)
                 FILTER nr > (target.inferredRisk || 0) 
                 UPDATE target WITH {{ inferredRisk: nr }} IN {c}
@@ -134,7 +138,7 @@ if __name__ == "__main__":
             db.aql.execute(f"""
                 FOR d IN {c}
                     LET ir = d.inferredRisk || 0
-                    LET lvl = ir >= 0.8 ? 'high' : (ir >= 0.3 ? 'medium' : 'low')
+                    LET lvl = ir >= 0.7 ? 'high' : (ir > 0.3 ? 'medium' : 'low')
                     UPDATE d WITH {{ riskLevel: lvl }} IN {c}
             """)
 

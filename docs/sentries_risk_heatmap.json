@@ -1,204 +1,99 @@
 {
     "graphId": "KnowledgeGraph",
     "name": "sentries_risk_heatmap",
-    "description": "Risk heatmap theme: colors nodes by pre-computed riskLevel (high/medium/low) for broad Visualizer compatibility",
+    "description": "Risk heatmap theme: colors nodes by inferredRisk score (high >= 0.7 red, low <= 0.3 green, medium otherwise yellow). Rules use the Graph Visualizer attribute-based schema and are evaluated in order, first match wins.",
+    "_riskRulesAttribute": "inferredRisk",
+    "_riskRulesNote": "Node rules below use the Visualizer's structured attribute-based schema (conditionType/condition.op/condition.right.value/condition.config/enabledFields). install_theme.py injects a fresh per-rule 'id' on install. High >= 0.7 -> #e53e3e, Low <= 0.3 -> #48bb78, Medium < 0.7 -> #d69e2e.",
     "nodeConfigMap": {
         "Person": {
-            "background": {
-                "color": "#e2e8f0",
-                "iconName": "fa6-solid:user"
-            },
+            "background": { "color": "#e2e8f0", "iconName": "fa6-solid:user" },
             "labelAttribute": "label",
             "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
-                {
-                    "name": "High Risk",
-                    "condition": "riskLevel == 'high'",
-                    "background": { "color": "#e53e3e" }
-                },
-                {
-                    "name": "Medium Risk",
-                    "condition": "riskLevel == 'medium'",
-                    "background": { "color": "#ecc94b" }
-                },
-                {
-                    "name": "Low Risk",
-                    "condition": "riskLevel == 'low'",
-                    "background": { "color": "#38a169" }
-                },
-                {
-                    "name": "Synthetic Entity",
-                    "condition": "dataSource == 'Synthetic'",
-                    "background": { "iconName": "fa6-solid:vial" }
-                }
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": ">=", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#e53e3e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<=", "right": { "type": "literal", "value": 0.3 }, "config": { "background": { "color": "#48bb78", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#d69e2e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } }
             ]
         },
         "Organization": {
-            "background": {
-                "color": "#e2e8f0",
-                "iconName": "fa6-solid:building"
-            },
+            "background": { "color": "#e2e8f0", "iconName": "fa6-solid:building" },
             "labelAttribute": "label",
             "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
-                {
-                    "name": "High Risk",
-                    "condition": "riskLevel == 'high'",
-                    "background": { "color": "#e53e3e" }
-                },
-                {
-                    "name": "Medium Risk",
-                    "condition": "riskLevel == 'medium'",
-                    "background": { "color": "#ecc94b" }
-                },
-                {
-                    "name": "Low Risk",
-                    "condition": "riskLevel == 'low'",
-                    "background": { "color": "#38a169" }
-                },
-                {
-                    "name": "Synthetic Entity",
-                    "condition": "dataSource == 'Synthetic'",
-                    "background": { "iconName": "fa6-solid:vial" }
-                }
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": ">=", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#e53e3e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<=", "right": { "type": "literal", "value": 0.3 }, "config": { "background": { "color": "#48bb78", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#d69e2e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } }
             ]
         },
         "Vessel": {
-            "background": {
-                "color": "#e2e8f0",
-                "iconName": "fa6-solid:ship"
-            },
+            "background": { "color": "#e2e8f0", "iconName": "fa6-solid:ship" },
             "labelAttribute": "label",
             "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
-                {
-                    "name": "High Risk",
-                    "condition": "riskLevel == 'high'",
-                    "background": { "color": "#e53e3e" }
-                },
-                {
-                    "name": "Medium Risk",
-                    "condition": "riskLevel == 'medium'",
-                    "background": { "color": "#ecc94b" }
-                },
-                {
-                    "name": "Low Risk",
-                    "condition": "riskLevel == 'low'",
-                    "background": { "color": "#38a169" }
-                },
-                {
-                    "name": "Synthetic Entity",
-                    "condition": "dataSource == 'Synthetic'",
-                    "background": { "iconName": "fa6-solid:vial" }
-                }
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": ">=", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#e53e3e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<=", "right": { "type": "literal", "value": 0.3 }, "config": { "background": { "color": "#48bb78", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#d69e2e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } }
             ]
         },
         "Aircraft": {
-            "background": {
-                "color": "#e2e8f0",
-                "iconName": "fa6-solid:plane"
-            },
+            "background": { "color": "#e2e8f0", "iconName": "fa6-solid:plane" },
             "labelAttribute": "label",
             "hoverInfoAttributes": ["label", "party_id", "riskScore", "inferredRisk", "riskLevel", "dataSource"],
             "rules": [
-                {
-                    "name": "High Risk",
-                    "condition": "riskLevel == 'high'",
-                    "background": { "color": "#e53e3e" }
-                },
-                {
-                    "name": "Medium Risk",
-                    "condition": "riskLevel == 'medium'",
-                    "background": { "color": "#ecc94b" }
-                },
-                {
-                    "name": "Low Risk",
-                    "condition": "riskLevel == 'low'",
-                    "background": { "color": "#38a169" }
-                }
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": ">=", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#e53e3e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<=", "right": { "type": "literal", "value": 0.3 }, "config": { "background": { "color": "#48bb78", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } },
+                { "attributePath": "inferredRisk", "attributeType": "number", "conditionType": "singleValue", "condition": { "op": "<", "right": { "type": "literal", "value": 0.7 }, "config": { "background": { "color": "#d69e2e", "iconName": "mdi:table" }, "labelAttribute": "", "hoverInfoAttributes": [], "rules": [] }, "enabledFields": { "color": true, "icon": false, "labelAttribute": false, "hoverInfoAttributes": false } } }
             ]
         },
         "Class": {
-            "background": {
-                "color": "#9f7aea",
-                "iconName": "fa6-solid:shapes"
-            },
+            "background": { "color": "#9f7aea", "iconName": "fa6-solid:shapes" },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "_id"]
+            "hoverInfoAttributes": ["label", "_id"],
+            "rules": []
         },
         "Property": {
-            "background": {
-                "color": "#48bb78",
-                "iconName": "fa6-solid:link"
-            },
+            "background": { "color": "#48bb78", "iconName": "fa6-solid:link" },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "_id"]
+            "hoverInfoAttributes": ["label", "_id"],
+            "rules": []
         },
         "ObjectProperty": {
-            "background": {
-                "color": "#48bb78",
-                "iconName": "fa6-solid:link"
-            },
+            "background": { "color": "#48bb78", "iconName": "fa6-solid:link" },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "_id"]
+            "hoverInfoAttributes": ["label", "_id"],
+            "rules": []
         },
         "Ontology": {
-            "background": {
-                "color": "#4a5568",
-                "iconName": "fa6-solid:database"
-            },
+            "background": { "color": "#4a5568", "iconName": "fa6-solid:database" },
             "labelAttribute": "label",
-            "hoverInfoAttributes": ["label", "_id"]
+            "hoverInfoAttributes": ["label", "_id"],
+            "rules": []
         }
     },
     "edgeConfigMap": {
         "owned_by": {
             "lineStyle": { "color": "#d69e2e", "thickness": 1.2 },
             "labelAttribute": "label",
-            "rules": [
-                {
-                    "name": "Synthetic Relationship",
-                    "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": { "lineType": "dashed" }
-                }
-            ]
+            "rules": []
         },
         "leader_of": {
             "lineStyle": { "color": "#4299e1", "thickness": 1.0 },
             "labelAttribute": "label",
-            "rules": [
-                {
-                    "name": "Synthetic Relationship",
-                    "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": { "lineType": "dashed" }
-                }
-            ]
+            "rules": []
         },
         "operates": {
             "lineStyle": { "color": "#4a5568", "thickness": 0.8 },
             "labelAttribute": "label",
-            "rules": [
-                {
-                    "name": "Synthetic Relationship",
-                    "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": { "lineType": "dashed" }
-                }
-            ]
+            "rules": []
         },
         "family_member_of": {
             "lineStyle": { "color": "#805ad5", "thickness": 1.0 },
             "labelAttribute": "label",
-            "rules": [
-                {
-                    "name": "Synthetic Relationship",
-                    "condition": "dataSource == 'Synthetic'",
-                    "lineStyle": { "lineType": "dashed" }
-                }
-            ]
+            "rules": []
         },
-        "subClassOf": { "labelAttribute": "label" },
-        "domain":     { "labelAttribute": "label" },
-        "range":      { "labelAttribute": "label" },
-        "type":       { "labelAttribute": "label" }
+        "subClassOf": { "labelAttribute": "label", "rules": [] },
+        "domain":     { "labelAttribute": "label", "rules": [] },
+        "range":      { "labelAttribute": "label", "rules": [] },
+        "type":       { "labelAttribute": "label", "rules": [] }
     }
 }

@@ -12,6 +12,7 @@ import json
 import os
 import re
 import sys
+import uuid
 from datetime import datetime
 from typing import Dict, Set
 
@@ -41,6 +42,16 @@ EXCLUDED_VERTEX_COLLECTIONS_BY_GRAPH: Dict[str, Set[str]] = {
 }
 
 TARGET_GRAPHS = ["OntologyGraph", "DataGraph", "KnowledgeGraph"]
+
+# The single theme that should carry isDefault=true per graph. A theme marked
+# default cannot be edited/saved in the Visualizer UI, so custom themes
+# (sentries_standard, sentries_risk_heatmap) are always non-default. For data
+# graphs we keep the Visualizer's built-in "Default" theme as the default.
+DEFAULT_THEME_BY_GRAPH: Dict[str, str] = {
+    "OntologyGraph": "Ontology",
+    "DataGraph": "Default",
+    "KnowledgeGraph": "Default",
+}
 
 # ---------------------------------------------------------------------------
 # Demo query definitions
@@ -109,12 +120,33 @@ FOR doc IN UNION(
 FILTER doc != null
 RETURN doc"""
 
+# Clean portfolio: the generated non-sanctioned counterparties plus the few
+# sanctioned anchors they are exposed to. Mostly green, with a handful of
+# high/medium/low hotspots that demonstrate inferred-risk propagation.
+_CLEAN_PORTFOLIO_QUERY = """\
+FOR doc IN UNION(
+  (FOR d IN Organization FILTER d.dataSource == "CleanPortfolio" RETURN d),
+  (FOR d IN Person       FILTER d.dataSource == "CleanPortfolio" RETURN d),
+  (FOR e IN owned_by FILTER e.dataSource == "CleanPortfolio"
+     LET t = DOCUMENT(e._to) FILTER t != null AND t.dataSource != "CleanPortfolio" RETURN t),
+  (FOR e IN family_member_of FILTER e.dataSource == "CleanPortfolio"
+     LET t = DOCUMENT(e._to) FILTER t != null AND t.dataSource != "CleanPortfolio" RETURN t)
+)
+FILTER doc != null
+RETURN doc"""
+
 VISUALIZER_QUERIES = [
     (
         "all_scenarios",
         "All Demo Scenarios",
         DEMO_SCENARIOS_QUERY,
         "Load all synthetic demo entities onto the canvas",
+    ),
+    (
+        "clean_portfolio",
+        "Risk Portfolio (mostly clean)",
+        _CLEAN_PORTFOLIO_QUERY,
+        "Clean counterparty portfolio with a few sanctioned-exposure hotspots (high/medium/low gradient)",
     ),
     (
         "scenario_d_shell_game",
@@ -223,15 +255,57 @@ def prune_theme(base_theme_raw: dict, vertex_colls: Set[str], edge_colls: Set[st
 
 
 def ensure_visualizer_shape(theme: dict) -> None:
-    """Add required default fields that the Visualizer expects."""
+    """Add required default fields that the Visualizer expects.
+
+    Also injects a fresh per-rule ``id`` (uuid4) into every attribute-based rule
+    that uses the Visualizer's structured schema (``condition`` is an object).
+    The Graph Visualizer keys rules by ``id``; missing/duplicate ids cause the
+    Attribute-based editor to misbehave.
+    """
+    # Drop JSON helper/comment keys (prefixed with "_") that are not part of the
+    # theme document the Visualizer reads.
+    for k in [k for k in theme if k.startswith("_")]:
+        del theme[k]
+
     for node_cfg in theme.get("nodeConfigMap", {}).values():
         node_cfg.setdefault("rules", [])
         node_cfg.setdefault("hoverInfoAttributes", [])
+        for rule in node_cfg.get("rules", []):
+            if isinstance(rule.get("condition"), dict):
+                rule["id"] = str(uuid.uuid4())
     for edge_cfg in theme.get("edgeConfigMap", {}).values():
         edge_cfg.setdefault("rules", [])
         edge_cfg.setdefault("hoverInfoAttributes", [])
         edge_cfg.setdefault("arrowStyle", {"sourceArrowShape": "none", "targetArrowShape": "triangle"})
         edge_cfg.setdefault("labelStyle", {"color": "#1d2531"})
+        for rule in edge_cfg.get("rules", []):
+            if isinstance(rule.get("condition"), dict):
+                rule["id"] = str(uuid.uuid4())
+
+
+def enforce_single_default(theme_col, graph_name: str) -> None:
+    """Ensure exactly one isDefault=true theme per graph.
+
+    A theme with isDefault=true cannot be saved/edited in the Visualizer UI, so
+    only the designated default (see DEFAULT_THEME_BY_GRAPH) is flagged true and
+    every other theme for the graph is forced to false. If the designated default
+    theme doesn't exist yet (e.g. the Visualizer hasn't auto-created "Default" for
+    a brand-new graph), we still clear all custom defaults and warn.
+    """
+    default_name = DEFAULT_THEME_BY_GRAPH.get(graph_name)
+    if not default_name:
+        return
+    themes = list(theme_col.find({"graphId": graph_name}))
+    found = False
+    for t in themes:
+        want = (t.get("name") == default_name)
+        found = found or want
+        if t.get("isDefault") != want:
+            theme_col.update({"_key": t["_key"], "isDefault": want}, check_rev=False)
+            print(f"    [isDefault] {graph_name}::{t.get('name')} -> {want}")
+    if not found:
+        print(f"    [WARN] {graph_name}: no '{default_name}' theme present; custom "
+              f"themes set non-default. The Visualizer creates '{default_name}' on first open.")
 
 
 def _upsert_theme(theme_col, theme: dict) -> None:
@@ -518,8 +592,11 @@ def install_themes() -> None:
                 theme["isDefault"] = True
             else:
                 theme = prune_theme(base_theme, vertex_colls, edge_colls)
-                # Make the risk heatmap the auto-applied default for data graphs
-                theme["isDefault"] = (theme.get("name") == "sentries_risk_heatmap")
+                # Keep the Visualizer's built-in "Default" theme as the auto-applied
+                # default for data graphs; custom themes are opt-in via the Legend.
+                # A theme marked isDefault=true cannot be saved/edited in the UI, so
+                # never flag sentries_risk_heatmap / sentries_standard as default.
+                theme["isDefault"] = False
 
             theme["graphId"] = graph_name
             theme["updatedAt"] = datetime.utcnow().isoformat() + "Z"
@@ -533,6 +610,12 @@ def install_themes() -> None:
             if graph_name in DATA_GRAPHS:
                 vp_id = ensure_default_viewpoint(db, graph_name)
                 install_demo_canvas_action(db, graph_name, vp_id)
+
+    # Enforce a single, editable default theme per graph (authoritative pass).
+    print("\nEnforcing single default theme per graph...")
+    for graph_name in TARGET_GRAPHS:
+        if db.has_graph(graph_name):
+            enforce_single_default(theme_col, graph_name)
 
     # AQL editor saved query (global Query Editor sidebar — bulk loader only)
     print("\nInstalling demo saved queries...")

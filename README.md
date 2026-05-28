@@ -60,14 +60,22 @@ python scripts/flatten_ofac.py   # produces data/parties.csv and data/relationsh
 python scripts/run_pipeline.py
 ```
 
-This single command runs all four stages in order:
+This single command runs all stages in order:
 
 | Stage | Script | What it does |
 |-------|--------|--------------|
 | 1 | `load_data.py` | Loads ontology + OFAC CSV data + synthetic fixtures |
 | 2 | `calculate_direct_risk.py` | Assigns `riskScore` from OFAC SDN list |
-| 3 | `calculate_inferred_risk.py` | Propagates `inferredRisk` + writes `riskLevel` |
-| 4 | `install_theme.py` | Installs Visualizer themes, canvas actions & saved queries |
+| 3 | `generate_clean_portfolio.py` | Adds clean (non-sanctioned) counterparties + a few sanctioned-exposure hotspots |
+| 4 | `calculate_inferred_risk.py` | Propagates `inferredRisk` (0.85/hop ownership decay) + writes `riskLevel` |
+| 5 | `install_theme.py` | Installs Visualizer themes, canvas actions & saved queries |
+
+> **Why the clean portfolio?** The loaded OFAC data is essentially the entire SDN
+> list, so ~99.9% of nodes are sanctioned (high risk) — without clean
+> counterparties the heatmap is uniformly red. `generate_clean_portfolio.py`
+> injects ~120 clean Organizations and ~180 clean Persons that stay green, with a
+> small, *isolated* set of entities wired into sanctioned anchors so risk
+> propagates outward into a high → medium → low gradient (the demo hotspots).
 
 Selective flags:
 
@@ -92,16 +100,26 @@ values. See [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for the full gu
 ## Demo Walkthrough
 
 Open the ArangoDB UI → **Graphs** → **KnowledgeGraph**.
-Select the **sentries_risk_heatmap** theme.
+Select the **sentries_risk_heatmap** theme from the Legend drop-down (it is not the
+default theme — the built-in **Default** theme is, so the heatmap stays editable).
 
-| Color | Meaning |
-|-------|---------|
-| Red | `riskLevel == 'high'` — `inferredRisk ≥ 0.8` |
-| Yellow | `riskLevel == 'medium'` — `0.3 ≤ inferredRisk < 0.8` |
-| Green | `riskLevel == 'low'` — `inferredRisk < 0.3` |
+The heatmap colors nodes directly from the `inferredRisk` score using ordered,
+first-match-wins attribute rules:
+
+| Color | Hex | Meaning |
+|-------|-----|---------|
+| Red | `#e53e3e` | `inferredRisk ≥ 0.7` (high) |
+| Yellow | `#d69e2e` | `0.3 < inferredRisk < 0.7` (medium) |
+| Green | `#48bb78` | `inferredRisk ≤ 0.3` (low) |
+
+The `sentries_standard` theme uses a separate cool/neutral palette (blue, purple,
+teal, slate) so entity-type coloring is never confused with the red/yellow/green
+risk colors.
 
 Use the **Queries** panel (Visualizer sidebar) → **"Load Demo Scenarios"** to bring
-all synthetic entities onto the canvas at once.
+all synthetic entities onto the canvas at once, or **"Risk Portfolio (mostly clean)"**
+to load the clean counterparty portfolio — a mostly-green graph with a handful of
+high/medium/low hotspots where exposure to sanctioned anchors propagates inward.
 
 See [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for step-by-step instructions.
 

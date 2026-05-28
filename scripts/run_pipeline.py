@@ -3,10 +3,11 @@
 Master pipeline runner for risk-intelligence.
 
 Runs all pipeline stages in order:
-  1. load_data          – ingest ontology, real OFAC parties/relationships, synthetic fixtures
-  2. calculate_direct_risk  – score entities from OFAC XML
-  3. calculate_inferred_risk – propagate risk through the graph
-  4. install_theme       – push themes and canvas actions to the Visualizer
+  1. load_data               – ingest ontology, real OFAC parties/relationships, synthetic fixtures
+  2. calculate_direct_risk   – score entities from OFAC XML
+  3. generate_clean_portfolio – add clean counterparties + sanctioned-exposure hotspots
+  4. calculate_inferred_risk  – propagate risk through the graph
+  5. install_theme           – push themes and canvas actions to the Visualizer
 
 Usage:
     python scripts/run_pipeline.py              # full pipeline
@@ -23,10 +24,11 @@ SCRIPTS_DIR = Path(__file__).parent
 
 # Ordered pipeline stages: (script_stem, human-readable description)
 STAGES = [
-    ("load_data",              "Load ontology, parties & synthetic fixtures"),
-    ("calculate_direct_risk",  "Calculate direct risk scores from OFAC data"),
-    ("calculate_inferred_risk","Propagate inferred risk through the graph"),
-    ("install_theme",          "Install Visualizer themes & canvas actions"),
+    ("load_data",                "Load ontology, parties & synthetic fixtures"),
+    ("calculate_direct_risk",    "Calculate direct risk scores from OFAC data"),
+    ("generate_clean_portfolio", "Generate clean counterparties & exposure hotspots"),
+    ("calculate_inferred_risk",  "Propagate inferred risk through the graph"),
+    ("install_theme",            "Install Visualizer themes & canvas actions"),
 ]
 
 
@@ -85,9 +87,10 @@ def main() -> None:
     if not args.skip_data:
         selected.append(STAGES[0])
     if not args.skip_risk:
-        selected += STAGES[1:3]
+        # direct risk -> clean portfolio (depends on anchors) -> inferred propagation
+        selected += STAGES[1:4]
     if not args.skip_themes:
-        selected.append(STAGES[3])
+        selected.append(STAGES[4])
 
     if not selected:
         print("No stages selected — all stages were skipped. Use --help to see options.")

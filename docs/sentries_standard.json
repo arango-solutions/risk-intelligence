@@ -15,19 +15,11 @@
                 "riskScore",
                 "dataSource"
             ],
-            "rules": [
-                {
-                    "name": "Synthetic Entity",
-                    "condition": "dataSource == 'Synthetic'",
-                    "background": {
-                        "color": "#9f7aea"
-                    }
-                }
-            ]
+            "rules": []
         },
         "Organization": {
             "background": {
-                "color": "#38a169",
+                "color": "#6b46c1",
                 "iconName": "fa6-solid:building"
             },
             "labelAttribute": "label",
@@ -37,19 +29,11 @@
                 "riskScore",
                 "dataSource"
             ],
-            "rules": [
-                {
-                    "name": "Synthetic Entity",
-                    "condition": "dataSource == 'Synthetic'",
-                    "background": {
-                        "color": "#9f7aea"
-                    }
-                }
-            ]
+            "rules": []
         },
         "Vessel": {
             "background": {
-                "color": "#319795",
+                "color": "#00a3c4",
                 "iconName": "fa6-solid:ship"
             },
             "labelAttribute": "label",
@@ -60,7 +44,7 @@
         },
         "Aircraft": {
             "background": {
-                "color": "#ed8936",
+                "color": "#718096",
                 "iconName": "fa6-solid:plane"
             },
             "labelAttribute": "label",
@@ -82,7 +66,7 @@
         },
         "Property": {
             "background": {
-                "color": "#48bb78",
+                "color": "#4299e1",
                 "iconName": "fa6-solid:link"
             },
             "labelAttribute": "label",
@@ -93,7 +77,7 @@
         },
         "ObjectProperty": {
             "background": {
-                "color": "#d69e2e",
+                "color": "#667eea",
                 "iconName": "fa6-solid:link"
             },
             "labelAttribute": "label",
