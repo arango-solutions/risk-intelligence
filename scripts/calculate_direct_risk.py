@@ -22,14 +22,26 @@ WEIGHTS = {
     "91243": 0.3   # Non-SDN Palestinian (Low)
 }
 
+# Human-readable source list per ListID. Recorded on each entity as
+# `sanctionsSources` so a trace can report WHICH list flagged the target.
+# This is also the seam for future jurisdictions (EU/UN/OFSI): add their
+# parsed entries to source_map and they appear here with no downstream change.
+LIST_NAMES = {
+    "1550": "OFAC SDN",
+    "91512": "OFAC Consolidated",
+    "91507": "OFAC SSI",
+    "91243": "OFAC Non-SDN Palestinian",
+}
+
 def calculate_direct_risk():
     client = ArangoClient(hosts=ARANGO_ENDPOINT)
     db = client.db(ARANGO_DATABASE, username=ARANGO_USERNAME, password=ARANGO_PASSWORD)
     
     print(f"Parsing {XML_PATH} for risk scoring...")
     
-    # Store ProfileID -> Score
+    # Store ProfileID -> Score, and ProfileID -> set of source list names
     risk_map = {}
+    source_map = {}
     
     # Iterative parse for SanctionsEntry
     context = etree.iterparse(XML_PATH, events=('end',), tag='{*}SanctionsEntry')
@@ -45,6 +57,10 @@ def calculate_direct_risk():
         # If multiple entries for one profile, take the highest risk
         if profile_id not in risk_map or score > risk_map[profile_id]:
             risk_map[profile_id] = score
+
+        # Record every source list this profile appears on (a profile can be on
+        # more than one list).
+        source_map.setdefault(profile_id, set()).add(LIST_NAMES.get(list_id, "OFAC Other"))
             
         count += 1
         elem.clear()
@@ -76,7 +92,8 @@ def calculate_direct_risk():
             if pid in existing_keys:
                 batch.append({
                     "_key": pid,
-                    "riskScore": score
+                    "riskScore": score,
+                    "sanctionsSources": sorted(source_map.get(pid, [])),
                 })
                 
                 if len(batch) >= 1000:

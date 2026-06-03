@@ -1,8 +1,16 @@
-# Scoping Plan: Traceability to Highly Sanctioned Entities
+# Traceability to Highly Sanctioned Entities
 
-**Status:** Draft for review (no implementation yet)
-**Date:** June 3, 2026
-**Decision:** Build additively inside `risk-intelligence` (not a fork). See "Fork triggers" for the exceptions.
+**Status:** Implemented (v1) — June 3, 2026
+**Decision:** Built additively inside `risk-intelligence` (not a fork). See "Fork triggers" for the exceptions.
+
+## Implemented in v1
+- **Source tagging** — `calculate_direct_risk.py` now writes `sanctionsSources` (e.g. `["OFAC SDN"]`) on every flagged entity, so a trace reports *which* list flagged the target. This is also the seam for future jurisdictions (EU/UN/OFSI) — no downstream changes needed.
+- **"Trace to sanctioned source" canvas action** — right-click a node in the Visualizer (DataGraph / KnowledgeGraph) to return the shortest path(s) to the nearest highly sanctioned entity (`riskScore >= 0.9`), rendered as an explainable hop-by-hop subgraph.
+
+## Deferred (open questions / later workstreams)
+- Optional precompute of `nearestSanctionedHops` (§3.4) — not built; ship-first decision.
+- Direction-aware variant (§3.3) — defaulted to `ANY`.
+- Multi-jurisdiction ingestion — separate workstream (must normalize + entity-resolve; see "Fork triggers").
 
 ---
 

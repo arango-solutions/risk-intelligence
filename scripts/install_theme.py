@@ -394,8 +394,14 @@ def _upsert_canvas_action(
     return action_id
 
 
-def install_canvas_actions(db, graph_name: str, vertex_colls: Set[str], edge_colls: Set[str]) -> None:
-    """Install per-collection Expand actions plus a general 2-hop action."""
+def install_canvas_actions(db, graph_name: str, vertex_colls: Set[str], edge_colls: Set[str],
+                           include_trace: bool = False) -> None:
+    """Install per-collection Expand actions plus a general 2-hop action.
+
+    When include_trace is True (data graphs only), also install a
+    'Trace to sanctioned source' action that returns the shortest path(s)
+    from the selected node(s) to the nearest highly sanctioned entity.
+    """
     ensure_collection(db, "_canvasActions")
     ensure_collection(db, "_viewpointActions", edge=True)
 
@@ -434,6 +440,29 @@ FOR node IN @nodes
         now,
     )
 
+    # Trace to the nearest highly sanctioned entity (data graphs only).
+    # PRUNE + bfs returns the shortest path that reaches a sanctioned node and
+    # stops there, so the result is the nearest exposure rather than deeper
+    # noise. RETURN p renders the full path (vertices + edges) for an
+    # explainable, hop-by-hop justification.
+    if include_trace:
+        _upsert_canvas_action(
+            canvas_col, vp_act_col, vp_id, graph_name,
+            "Trace to sanctioned source",
+            "Shortest path(s) from the selected node(s) to the nearest highly "
+            "sanctioned entity (riskScore >= 0.9)",
+            f"""{with_clause}
+FOR node IN @nodes
+  FOR v, e, p IN 1..4 ANY node GRAPH "{graph_name}"
+    PRUNE (v.riskScore || 0) >= 0.9
+    OPTIONS {{ uniqueVertices: "path", bfs: true }}
+    FILTER (v.riskScore || 0) >= 0.9
+    LIMIT 50
+    RETURN p""",
+            {"nodes": []},
+            now,
+        )
+
     # Per-collection 1-hop expand
     for v_coll in sorted(vertex_colls):
         _upsert_canvas_action(
@@ -450,7 +479,8 @@ FOR node IN @nodes
             now,
         )
 
-    print(f"    Installed {len(vertex_colls) + 1} canvas actions for {graph_name}")
+    general_count = 2 if include_trace else 1
+    print(f"    Installed {len(vertex_colls) + general_count} canvas actions for {graph_name}")
 
 
 # ---------------------------------------------------------------------------
@@ -603,8 +633,10 @@ def install_themes() -> None:
             ensure_visualizer_shape(theme)
             _upsert_theme(theme_col, theme)
 
-            # Canvas actions: per-collection expand + 2-hop explorer
-            install_canvas_actions(db, graph_name, vertex_colls, edge_colls)
+            # Canvas actions: per-collection expand + 2-hop explorer (+ trace
+            # to sanctioned source on data graphs, which carry riskScore)
+            install_canvas_actions(db, graph_name, vertex_colls, edge_colls,
+                                   include_trace=graph_name in DATA_GRAPHS)
 
             # Demo canvas action + Queries-panel entry for data graphs only
             if graph_name in DATA_GRAPHS:

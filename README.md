@@ -121,6 +121,12 @@ all synthetic entities onto the canvas at once, or **"Risk Portfolio (mostly cle
 to load the clean counterparty portfolio — a mostly-green graph with a handful of
 high/medium/low hotspots where exposure to sanctioned anchors propagates inward.
 
+**Trace to a sanctioned source:** right-click any node → **"Trace to sanctioned
+source"** to render the shortest path(s) from that entity to the nearest highly
+sanctioned party (`riskScore >= 0.9`). Each sanctioned entity is tagged with a
+`sanctionsSources` attribute (e.g. `OFAC SDN`) recording which list flagged it.
+See [docs/sanctioned_traceability_plan.md](docs/sanctioned_traceability_plan.md).
+
 See [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for step-by-step instructions.
 
 ---
